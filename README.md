@@ -101,7 +101,7 @@ mode: single
 ```
 
 ### Download and Upload template sensors that converts bytes to Mbits
-```
+```yaml
 template:
 - sensor:
   - name: "Internet Download"
