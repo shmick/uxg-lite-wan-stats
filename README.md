@@ -1,6 +1,7 @@
-## Since I'm using PPPoE with my ISP, I'm monitoring the ppp0 interface
 
-### The script to gather stats and send them to Home Assistant
+### Since I'm using PPPoE with my ISP, I'm monitoring the ppp0 interface
+
+### The script to gather stats and send them to Home Assistant. This gets installed on the UXG Lite 
 
 #### Filename: /persistent/system/ppp0_stats.sh
 ```bash
