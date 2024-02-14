@@ -39,11 +39,20 @@ fi
 * * * * * ( sleep 40 ; /persistent/system/ppp0_stats.sh )
 * * * * * ( sleep 50 ; /persistent/system/ppp0_stats.sh )
 ```
+### Create 2 Input Number helpers
+#### 1) WAN Bytes Received
+#### 2) WAN Bytes Sent
+```
+Min Value: 0
+Max Value: 9223372036854775807
+Display mode: input field
+Unit of measurement: Bytes
+```
 
-### Automation YAML to create 2 events from the incoming data
+### Automation YAML to update the WAN Bytes Received and WAN Bytes Sent values
 ```yaml
-alias: UXG ppp0 stats
-description: UXG ppp0 stats
+alias: UXG WAN stats
+description: UXG WAN stats
 trigger:
   - platform: webhook
     allowed_methods:
@@ -52,50 +61,35 @@ trigger:
     webhook_id: "uxg_wan_stats"
 condition: []
 action:
-  - alias: Update Data Received
-    event: set_ppp0_data_received
-    event_data:
-      state: "{{ trigger.json.data_received }}"
-  - alias: Update Data Sent
-    event: set_ppp0_data_sent
-    event_data:
-      state: "{{ trigger.json.data_sent }}"
+  - service: input_number.set_value
+    metadata: {}
+    data_template:
+      value: "{{ trigger.json.data_received }}"
+    target:
+      entity_id: input_number.wan_bytes_received
+  - service: input_number.set_value
+    metadata: {}
+    data_template:
+      value: "{{ trigger.json.data_sent }}"
+    target:
+      entity_id: input_number.wan_bytes_sent
 mode: single
 ```
 
-### Template sensors that update their values from the raw event data
-```yaml
-- trigger:
-  - platform: event
-    event_type: set_ppp0_data_received
-  sensor:
-  - name: UXG ppp0 Data Received
-    unique_id: uxg_ppp0_data_received
-    state: "{{ trigger.event.data.state }}"
-
-- trigger:
-  - platform: event
-    event_type: set_ppp0_data_sent
-  sensor:
-  - name: UXG ppp0 Data Sent
-    unique_id: uxg_ppp0_data_sent
-    state: "{{ trigger.event.data.state }}"
-```
-
-### Statistics sensors to determine bytes/second using last 4 samples
+### Create 2 statistics sensors to determine bytes/second using last 4 samples
 ```yaml
 - platform: statistics
   name: "UXG WAN in Stats"
-  entity_id: sensor.uxg_ppp0_data_received
-  sampling_size: 4
+  entity_id: input_number.wan_bytes_received
+  sampling_size: 3
   state_characteristic: change_second
   max_age:
     hours: 24
 
 - platform: statistics
   name: "UXG WAN out Stats"
-  entity_id: sensor.uxg_ppp0_data_sent
-  sampling_size: 4
+  entity_id: input_number.wan_bytes_sent
+  sampling_size: 3
   state_characteristic: change_second
   max_age:
     hours: 24
